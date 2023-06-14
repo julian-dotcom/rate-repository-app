@@ -1,10 +1,16 @@
 import { StyleSheet, View, ViewStyle } from "react-native";
 import { useField } from "formik";
-import { theme } from "../config/theme";
 import Text from "./Text";
 import TextInput from "./TextInput";
 
-const FormikTextInput = ({ name, ...props }: { name: string; placeholder: string }) => {
+const FormikTextInput = ({
+  name,
+  ...props
+}: {
+  name: string;
+  placeholder?: string;
+  multiline?: boolean;
+}) => {
   const [field, meta, helpers] = useField(name);
   const showError = meta.touched && meta.error;
 

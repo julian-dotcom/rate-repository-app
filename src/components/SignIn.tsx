@@ -1,16 +1,14 @@
-import { View, Pressable, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import FormikTextInput from "./FormikTextInput";
 import { Formik } from "formik";
 import * as yup from "yup";
-import Text from "./Text";
-import { useSignIn } from "../hooks/useSignIn";
-import { useNavigate } from "react-router-native";
+import { useAuthenticate } from "../hooks/useAuthenticate";
 import { useAuthStorage } from "../hooks/useAuthStorage";
 import { useEffect } from "react";
+import LongButton from "./LongButton";
 
 const SignIn = () => {
-  const [signIn] = useSignIn();
-  const navigate = useNavigate();
+  const { signIn } = useAuthenticate();
 
   const authStorage = useAuthStorage();
   useEffect(() => {
@@ -26,7 +24,6 @@ const SignIn = () => {
 
     try {
       const res = await signIn({ username, password });
-      navigate("/");
       console.log(res);
     } catch (e) {
       console.log(e);
@@ -36,11 +33,11 @@ const SignIn = () => {
   const validationSchema = yup.object().shape({
     username: yup
       .string()
-      .min(5, "Username must be at least 6 characters")
+      .min(5, "Username must be at least 5 characters")
       .required("Username is required"),
     password: yup
       .string()
-      .min(6, "Password must be at least 6 characters")
+      .min(5, "Password must be at least 5 characters")
       .required("Password is required"),
   });
 
@@ -54,9 +51,7 @@ const SignIn = () => {
         <View style={styles.box}>
           <FormikTextInput name="username" placeholder="Username" />
           <FormikTextInput name="password" placeholder="Password" />
-          <Pressable style={styles.submitButton} onPress={async () => handleSubmit()}>
-            <Text style={styles.submitText}>Sign in</Text>
-          </Pressable>
+          <LongButton text="Sign In" func={async () => handleSubmit()} />
         </View>
       )}
     </Formik>
@@ -70,18 +65,6 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: "space-between",
     height: 170,
-  },
-  submitButton: {
-    backgroundColor: "#0366d6",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 40,
-    borderRadius: 5,
-  },
-  submitText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
   },
 });
 export default SignIn;

@@ -4,26 +4,31 @@ import { View, Image, StyleSheet } from "react-native";
 import { theme } from "../config/theme";
 import RepoStat from "./RepoStat";
 import Text from "./Text";
+import LongButton from "./LongButton";
+import * as Linking from "expo-linking";
 
-const RepositoryItem = ({ repo }: { repo: Repository }) => {
+const RepositoryItem = ({ repo, github = false }: { repo: Repository; github?: boolean }) => {
   return (
     <View style={styles.card}>
       <View style={styles.summary}>
         <Image style={styles.image} source={{ uri: repo.ownerAvatarUrl }} />
-        <View>
+        <View testID="repositoryItem">
           <Text style={styles.nameText}>{repo.fullName}</Text>
-          <Text style={styles.descriptionText}>{repo.description}</Text>
+          <Text testID="description" style={styles.descriptionText}>
+            {repo.description}
+          </Text>
           <View style={styles.repoLanguageBox}>
             <Text style={styles.repoLanguageText}>{repo.language}</Text>
           </View>
         </View>
       </View>
       <View style={styles.repoStatistics}>
-        <RepoStat num={repo.stargazersCount} name="Stars" />
-        <RepoStat num={repo.forksCount} name="Forks" />
-        <RepoStat num={repo.reviewCount || 0} name="Reviews" />
-        <RepoStat num={repo?.ratingAverage || 0} name="Rating" />
+        <RepoStat val={repo.stargazersCount} name="Stars" />
+        <RepoStat val={repo.forksCount} name="Forks" />
+        <RepoStat val={repo?.reviewCount || "n/a"} name="Reviews" />
+        <RepoStat val={repo?.ratingAverage || "n/a"} name="Rating" />
       </View>
+      {github && <LongButton text="Open in GitHub" func={() => Linking.openURL(repo.url)} />}
     </View>
   );
 };
@@ -33,6 +38,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "white",
     padding: 10,
+    marginBottom: 10,
   },
   descriptionText: {
     fontSize: 17,
