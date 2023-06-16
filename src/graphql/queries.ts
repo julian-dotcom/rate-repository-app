@@ -23,7 +23,7 @@ export const GET_REPOSITORIES = gql`
 `;
 
 export const GET_REPOSITORY = gql`
-  query Repository($repositoryId: ID!) {
+  query Repository($repositoryId: ID!, $reviewsFirst: Int, $reviewsAfter: String) {
     repository(id: $repositoryId) {
       id
       ownerName
@@ -41,7 +41,8 @@ export const GET_REPOSITORY = gql`
       description
       language
       userHasReviewed
-      reviews {
+      reviews(first: $reviewsFirst, after: $reviewsAfter) {
+        totalCount
         edges {
           node {
             id
@@ -53,6 +54,13 @@ export const GET_REPOSITORY = gql`
               username
             }
           }
+          cursor
+        }
+        pageInfo {
+          endCursor
+          startCursor
+          hasPreviousPage
+          hasNextPage
         }
       }
     }

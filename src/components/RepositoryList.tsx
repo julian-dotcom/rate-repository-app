@@ -21,7 +21,6 @@ export const RepositoryList = () => {
     setSortedRepos([...sorted]);
   }, [repositories, sort]);
 
-  console.log(sortedRepos.map((r) => r?.id));
   return (
     <PaperProvider>
       <View>

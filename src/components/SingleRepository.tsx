@@ -6,7 +6,7 @@ import { useRepository } from "../hooks/useRepository";
 import { Review } from "../config/types";
 
 const SingleRepository = () => {
-  const repository = useRepository();
+  const { repository, fetchMore, loading } = useRepository();
   return (
     <View>
       {repository && (
@@ -16,9 +16,11 @@ const SingleRepository = () => {
           keyExtractor={({ id }: { id: string }) => id}
           ListHeaderComponent={() => <RepositoryItem repo={repository} github />}
           ItemSeparatorComponent={ItemSeparator}
+          onEndReached={() => fetchMore()}
+          onEndReachedThreshold={0.5}
         />
       )}
-      {!repository && <Text>Loading...</Text>}
+      {loading && <Text>Loading...</Text>}
     </View>
   );
 };

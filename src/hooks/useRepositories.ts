@@ -16,7 +16,6 @@ export const useRepositories = () => {
   });
 
   useEffect(() => {
-    console.log("fetched");
     const raw = data?.repositories?.edges;
     if (raw) {
       const processedRepos = Array.from(raw, (r: any) => parseRepository(r.node));

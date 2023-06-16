@@ -14,12 +14,11 @@ const SignUp = () => {
 
   const onSubmit = async (newUser: NewUser) => {
     const { username, password } = newUser;
-    const { data } = await mutate({
+    await mutate({
       variables: {
         user: { username, password },
       },
     });
-    console.log(data);
     await signIn({ username, password });
   };
   return (

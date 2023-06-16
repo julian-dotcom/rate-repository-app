@@ -5,23 +5,38 @@ import { useParams } from "react-router-native";
 import { Repository } from "../config/types";
 import { parseRepository } from "../utils/helpers";
 
+const REVIEWS_FIRST = 4;
+
 export const useRepository = () => {
   const [repository, setRepository] = useState<Repository>();
   const { id } = useParams();
-  console.log(id);
 
-  const { data } = useQuery(GET_REPOSITORY, {
+  const { data, loading, fetchMore } = useQuery(GET_REPOSITORY, {
     fetchPolicy: "cache-and-network",
-    variables: { repositoryId: id },
+    variables: { repositoryId: id, reviewsFirst: REVIEWS_FIRST },
   });
 
   useEffect(() => {
-    const raw: any = data?.repository;
+    console.log("refiring hook", data);
+    const raw = data?.repository;
     if (!raw) return;
     const parsed = parseRepository(raw);
-    console.log("\n");
     setRepository(parsed);
   }, [data]);
 
-  return repository;
+  const handleFetchMore = () => {
+    const canFetchMore = !loading && data?.repository?.reviews?.pageInfo?.hasNextPage;
+    if (!canFetchMore) return;
+    console.log("passed gate");
+    const res = fetchMore({
+      variables: {
+        reviewsAfter: data.repository.reviews.pageInfo.endCursor,
+        reviewsFirst: REVIEWS_FIRST,
+        repositoryId: id,
+      },
+    });
+    console.log("res: ", res);
+  };
+
+  return { repository, fetchMore: handleFetchMore, loading };
 };
