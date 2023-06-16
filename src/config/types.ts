@@ -1,3 +1,15 @@
+export interface CurrentUser {
+  username: string;
+  id: string;
+  reviews: ReviewWithRepoInfo[];
+}
+
+export interface NewUser {
+  username: string;
+  password: string;
+  passwordConfirmation: string;
+}
+
 export interface Repository {
   id: string;
   createdAt: string;
@@ -13,15 +25,32 @@ export interface Repository {
   ownerAvatarUrl: string;
 }
 
-export interface Review {
+interface ReviewBase {
   id: string;
   text: string;
   rating: number;
   createdAt: string;
+}
+
+interface ReviewWithUser extends ReviewBase {
   user: {
     id: string;
     username: string;
   };
+}
+
+interface ReviewWithRepoInfo extends ReviewBase {
+  repository: {
+    fullName: string;
+    id: string;
+  };
+}
+
+export type Review = ReviewWithUser | ReviewWithRepoInfo;
+
+export enum ReviewType {
+  REVIEW_WITH_USER = "ReviewWithUser",
+  REVIEW_WITH_REPO_INFO = "ReviewWithRepoInfo",
 }
 
 export interface NewReview {
@@ -29,12 +58,6 @@ export interface NewReview {
   repositoryName: string;
   rating: string;
   text: string;
-}
-
-export interface NewUser {
-  username: string;
-  password: string;
-  passwordConfirmation: string;
 }
 
 export enum SortType {

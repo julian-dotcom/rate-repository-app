@@ -3,27 +3,26 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_REPOSITORIES } from "../graphql/queries";
 import { parseRepository } from "../utils/helpers";
-import { SortType } from "../config/types";
-import { sortRepos } from "../utils/helpers";
+import { useDebounce } from "use-debounce";
 
-export const useRepositories = (sort: SortType) => {
-  const [originalRepositories, setOriginalRepositories] = useState<Repository[]>([]);
+export const useRepositories = () => {
   const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [query, setQuery] = useState("");
+  const [debouncedQuery] = useDebounce(query, 500);
 
-  const { data } = useQuery(GET_REPOSITORIES, { fetchPolicy: "cache-and-network" });
+  const { data } = useQuery(GET_REPOSITORIES, {
+    variables: { searchKeyword: debouncedQuery },
+    fetchPolicy: "cache-and-network",
+  });
 
   useEffect(() => {
-    const res = data?.repositories?.edges;
-    if (res) {
-      const processedRepos = Array.from(res, (r: any) => parseRepository(r.node));
-      setOriginalRepositories(processedRepos);
+    console.log("fetched");
+    const raw = data?.repositories?.edges;
+    if (raw) {
+      const processedRepos = Array.from(raw, (r: any) => parseRepository(r.node));
+      setRepositories(processedRepos);
     }
   }, [data]);
 
-  useEffect(() => {
-    const sorted = sortRepos(originalRepositories, sort);
-    setRepositories([...sorted]);
-  }, [originalRepositories, sort]);
-
-  return { repositories };
+  return { repositories, query, setQuery };
 };

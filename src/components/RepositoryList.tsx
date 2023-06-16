@@ -1,41 +1,43 @@
 import { FlatList, View, Pressable } from "react-native";
-import { Repository, SortType } from "../config/types";
+import { PaperProvider, Searchbar } from "react-native-paper";
+import { Repository } from "../config/types";
+import { sortRepos } from "../utils/helpers";
+import { SortType } from "../config/types";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-native";
 import { useRepositories } from "../hooks/useRepositories";
-import { useEffect, useState } from "react";
 import ItemSeparator from "./ItemSeparator";
 import RepositoryItem from "./RepositoryItem";
 import SortRepositories from "./SortRepositories";
-import { PaperProvider } from "react-native-paper";
-import { sortRepos } from "../utils/helpers";
 
 export const RepositoryList = () => {
   const [sort, setSort] = useState<SortType>(SortType.LATEST);
-  const { repositories } = useRepositories(sort);
-  // const [sorted, setSorted] = useState<Repository[]>([]);
+  const [sortedRepos, setSortedRepos] = useState<Repository[]>([]);
+  const { repositories, query, setQuery } = useRepositories();
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   const sorted = sortRepos(repositories, sort);
+  useEffect(() => {
+    const sorted = sortRepos(repositories, sort);
+    setSortedRepos([...sorted]);
+  }, [repositories, sort]);
 
-  //   setSorted(sorted);
-  // }, [repositories, sort]);
-
-  console.log(
-    repositories.map((s) => ({
-      name: s.fullName,
-      createdAt: s.createdAt,
-      ratingAverage: s.ratingAverage,
-    }))
-  );
+  console.log(sortedRepos.map((r) => r?.id));
   return (
     <PaperProvider>
       <View>
         <FlatList
-          data={repositories}
-          extraData={repositories}
+          data={sortedRepos}
           ItemSeparatorComponent={ItemSeparator}
-          ListHeaderComponent={<SortRepositories setSort={setSort} />}
+          ListHeaderComponent={
+            <>
+              <Searchbar
+                placeholder="Search"
+                onChangeText={(input) => setQuery(input)}
+                value={query}
+              />
+              <SortRepositories setSort={setSort} />
+            </>
+          }
           renderItem={({ item }) => (
             <Pressable onPress={() => navigate(`repositories/${item.id}`)}>
               <RepositoryItem repo={item} />

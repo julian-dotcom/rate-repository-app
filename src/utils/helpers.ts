@@ -1,4 +1,4 @@
-import { Repository, Review, SortType } from "../config/types";
+import { Repository, Review, SortType, CurrentUser } from "../config/types";
 
 export const parseNumber = (key: string, obj: any) => {
   if (isObj(obj) && key in obj && obj[key] !== undefined && typeof obj[key] === "number") {
@@ -18,7 +18,17 @@ const isObj = (obj: any) => {
   } else return false;
 };
 
-const parseReviews = (obj: any): Review[] | undefined => {
+export const parseUser = (raw: any) => {
+  const me = raw?.me;
+  if (!me || !me?.username || !me?.id) return;
+  const processed: CurrentUser = { username: me.username, id: me.id, reviews: [] };
+  if (me?.reviews?.edges) {
+    processed.reviews = me.reviews.edges.map((r: any) => parseReview(r?.node));
+  }
+  return processed;
+};
+
+const parseReviews = (obj: any): Review[] => {
   const reviews = obj?.reviews?.edges;
   if (!reviews || !Array.isArray(reviews) || reviews.length === 0) return [];
   const parsed: Review[] = [];
@@ -35,10 +45,18 @@ const parseReview = (raw: any): Review => {
     text: parseString("text", raw),
     rating: parseNumber("rating", raw),
     createdAt: parseString("createdAt", raw),
-    user: {
-      id: parseString("id", raw?.user),
-      username: parseString("username", raw?.user),
-    },
+    ...(raw.user && {
+      user: {
+        id: parseString("id", raw?.user),
+        username: parseString("username", raw?.user),
+      },
+    }),
+    ...(raw.repository && {
+      repository: {
+        fullName: parseString("fullName", raw?.repository),
+        id: parseString("id", raw?.repository),
+      },
+    }),
   };
   return processedReview;
 };
@@ -63,10 +81,8 @@ export const parseRepository = (repo: any): Repository => {
 };
 
 export const sortRepos = (repositories: Repository[], sortType: SortType): Repository[] => {
-  console.log(sortType);
   let sorted;
   if (sortType == SortType.HIGHEST) {
-    console.log("Highest");
     sorted = repositories.sort((a, b) =>
       a.ratingAverage === undefined && b.ratingAverage === undefined
         ? 0
@@ -77,7 +93,6 @@ export const sortRepos = (repositories: Repository[], sortType: SortType): Repos
         : b.ratingAverage - a.ratingAverage
     );
   } else if (sortType === SortType.LOWEST) {
-    console.log("Lowest");
     sorted = repositories.sort((a, b) =>
       a.ratingAverage === undefined && b.ratingAverage === undefined
         ? 0
@@ -88,14 +103,7 @@ export const sortRepos = (repositories: Repository[], sortType: SortType): Repos
         : a.ratingAverage - b.ratingAverage
     );
   } else {
-    console.log("Newest");
-    sorted = repositories.sort((a, b) => {
-      const dateA = a.createdAt.toUpperCase();
-      const dateB = b.createdAt.toUpperCase();
-      if (dateA > dateB) return -1;
-      else if (dateA < dateB) return 1;
-      else return 0;
-    });
+    sorted = repositories;
   }
   return sorted;
 };

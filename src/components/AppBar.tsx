@@ -24,6 +24,11 @@ const AppBar = () => {
                 <Text style={styles.text}>Create Review</Text>
               </Link>
             </Pressable>
+            <Pressable>
+              <Link to="/myreviews">
+                <Text style={styles.text}>My Reviews</Text>
+              </Link>
+            </Pressable>
             <Pressable onPress={signOut}>
               <Text style={styles.text}>Sign Out</Text>
             </Pressable>
