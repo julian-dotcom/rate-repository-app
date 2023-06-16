@@ -17,7 +17,6 @@ export const useRepository = () => {
   });
 
   useEffect(() => {
-    console.log("refiring hook", data);
     const raw = data?.repository;
     if (!raw) return;
     const parsed = parseRepository(raw);
@@ -27,15 +26,13 @@ export const useRepository = () => {
   const handleFetchMore = () => {
     const canFetchMore = !loading && data?.repository?.reviews?.pageInfo?.hasNextPage;
     if (!canFetchMore) return;
-    console.log("passed gate");
-    const res = fetchMore({
+    fetchMore({
       variables: {
         reviewsAfter: data.repository.reviews.pageInfo.endCursor,
         reviewsFirst: REVIEWS_FIRST,
         repositoryId: id,
       },
     });
-    console.log("res: ", res);
   };
 
   return { repository, fetchMore: handleFetchMore, loading };
